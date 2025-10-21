@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard de Ciudades</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Dashboard</h1>
+
+    {% if error %}
+        <p style="color:red;">Error: {{ error.error }}</p>
+    {% endif %}
+
+    <div style="width: 500px; height: 500px; margin: auto;">
+        <canvas id="populationChart"></canvas>
+    </div>
+
+    <!-- Pasamos las ciudades al JS externo -->
+    <script>
+        window.citiesData = {{ cities|default([])|tojson|safe }};
+    </script>
+    <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+</body>
+</html>
