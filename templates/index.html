@@ -2,24 +2,33 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard de Ciudades</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Index - Selección</title>
 </head>
 <body>
-    <h1>Dashboard</h1>
+    <h1 style="font-family: Arial, Helvetica, sans-serif;">Selecciona una tabla</h1>
 
-    {% if error %}
-        <p style="color:red;">Error: {{ error.error }}</p>
-    {% endif %}
-
-    <div style="width: 500px; height: 500px; margin: auto;">
-        <canvas id="populationChart"></canvas>
+    <div>
+        <button onclick="loadTable('city')">City</button>
+        <button onclick="loadTable('country')">Country</button>
+        <button onclick="loadTable('countrylanguage')">CountryLanguage</button>
+        <button onclick="location.href = '/dashboard' ">Ir al dashboard</button>
     </div>
 
-    <!-- Pasamos las ciudades al JS externo -->
+    <div style="margin-top: 20px;">
+        <pre id="result"></pre>
+    </div>
+
     <script>
-        window.citiesData = {{ cities|default([])|tojson|safe }};
+        async function loadTable(tableName) {
+            try {
+                const response = await fetch(`/api/${tableName}`);
+                const data = await response.json();
+                // Mostrar el JSON formateado
+                document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                document.getElementById('result').textContent = "Error al cargar los datos:\n" + err;
+            }
+        }
     </script>
-    <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
 </body>
 </html>
