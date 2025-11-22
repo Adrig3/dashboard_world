@@ -3,6 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <title>Index - Selección</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        #result {
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
 </head>
 <body>
     <h1 style="font-family: Arial, Helvetica, sans-serif;">Selecciona una tabla</h1>
@@ -11,22 +32,65 @@
         <button onclick="loadTable('city')">City</button>
         <button onclick="loadTable('country')">Country</button>
         <button onclick="loadTable('countrylanguage')">CountryLanguage</button>
-        <button onclick="location.href = '/dashboard' ">Ir al dashboard</button>
+        <button onclick="location.href = '/dashboard'">Ir al dashboard</button>
     </div>
 
-    <div style="margin-top: 20px;">
+    <div id="container" style="margin-top: 20px;">
         <pre id="result"></pre>
     </div>
 
     <script>
         async function loadTable(tableName) {
+            const container = document.getElementById("container");
+            container.innerHTML = "<p>Cargando...</p>";
+
             try {
                 const response = await fetch(`/api/${tableName}`);
                 const data = await response.json();
-                // Mostrar el JSON formateado
-                document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+
+                if (Array.isArray(data) && data.length > 0 && typeof data[0] === "object") {
+                    // Crear tabla dinámica
+                    const table = document.createElement("table");
+
+                    // Encabezados
+                    const thead = document.createElement("thead");
+                    const headerRow = document.createElement("tr");
+
+                    Object.keys(data[0]).forEach(key => {
+                        const th = document.createElement("th");
+                        th.textContent = key;
+                        headerRow.appendChild(th);
+                    });
+
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+
+                    // Filas
+                    const tbody = document.createElement("tbody");
+                    data.forEach(row => {
+                        const tr = document.createElement("tr");
+                        Object.values(row).forEach(value => {
+                            const td = document.createElement("td");
+                            td.textContent = value;
+                            tr.appendChild(td);
+                        });
+                        tbody.appendChild(tr);
+                    });
+
+                    table.appendChild(tbody);
+
+                    container.innerHTML = "";
+                    container.appendChild(table);
+
+                } else {
+                    // Si no es una lista de objetos, mostrar JSON
+                    container.innerHTML = '<pre id="result"></pre>';
+                    document.getElementById("result").textContent = JSON.stringify(data, null, 2);
+                }
+
             } catch (err) {
-                document.getElementById('result').textContent = "Error al cargar los datos:\n" + err;
+                container.innerHTML = '<pre id="result"></pre>';
+                document.getElementById("result").textContent = "Error al cargar los datos:\n" + err;
             }
         }
     </script>
